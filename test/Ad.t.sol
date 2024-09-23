@@ -44,8 +44,11 @@ contract AdTest is Test {
     assertEq(taxes, 0);
     Setter setter = new Setter();
     payable(address(setter)).transfer(1 ether);
-    uint256 setterValue = 1;
+    uint256 setterValue = 2;
+    uint256 balance0 = address(this).balance;
     setter.set(ad, title, href, setterValue);
+    uint256 balance1 = address(this).balance;
+    assertEq(balance1 - balance0, 1);
     assertEq(ad.controller(), address(setter));
     assertEq(ad.collateral(), 1);
     assertEq(ad.timestamp(), block.timestamp);
@@ -64,7 +67,7 @@ contract AdTest is Test {
     Setter setter = new Setter();
     payable(address(setter)).transfer(1 ether);
     vm.expectRevert(Ad.ErrValue.selector);
-    uint256 setterValue = 1;
+    uint256 setterValue = 3;
     setter.set(ad, title, href, setterValue);
   }
 
@@ -123,15 +126,19 @@ contract AdTest is Test {
     Setter setter = new Setter();
     payable(address(setter)).transfer(1 ether);
     uint256 balance0 = address(this).balance;
-    uint256 setterValue = ad.collateral();
+
+    uint256 setterValue = 1 ether;
     setter.set(ad, title, href, setterValue);
+
+    uint256 difference = setterValue - nextPrice1;
+    uint256 markup = difference / 2;
     uint256 balance1 = address(this).balance;
-    assertEq(balance1 - balance0, nextPrice1);
+    assertEq(balance1 - balance0, nextPrice1+markup);
 
 
     uint256 collateral1 = ad.collateral();
     assertEq(ad.controller(), address(setter));
-    assertEq(collateral1, collateral0);
+    assertEq(collateral1, setterValue - markup);
     assertEq(ad.timestamp(), block.timestamp);
   }
 

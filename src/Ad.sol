@@ -50,19 +50,22 @@ contract Ad is ReentrancyGuard {
       timestamp = block.timestamp;
     } else {
       (uint256 nextPrice, uint256 taxes) = price();
-      if (msg.value <= nextPrice) {
+
+      if (msg.value < nextPrice+2) {
         revert ErrValue();
       }
+      uint256 difference = msg.value-nextPrice;
+      uint256 markup = difference/2;
 
       address lastController = controller;
       title = _title;
       href = _href;
       controller = msg.sender;
-      collateral = msg.value;
+      collateral = msg.value-markup;
       timestamp = block.timestamp;
 
       treasury.call{value: taxes}("");
-      lastController.call{value: nextPrice}("");
+      lastController.call{value: nextPrice+markup}("");
     }
   }
 }
