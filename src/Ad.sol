@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import { Harberger, Perwei } from "./Harberger.sol";
 import { ReentrancyGuard } from "./ReentrancyGuard.sol";
+import { FixedPointMathLib } from "./FixedPointMathLib.sol";
 
 address constant treasury = 0x1337E2624ffEC537087c6774e9A18031CFEAf0a9;
 address constant admin = 0xee324c588ceF1BF1c1360883E4318834af66366d;
@@ -22,6 +23,13 @@ contract Ad is ReentrancyGuard {
   uint256 public collateral;
   uint256 public timestamp;
 
+  // NOTE: excess is the total collected markup.
+  uint256 public excess;
+  // NOTE: revenue is all the taxes collected.
+  uint256 public revenue;
+  mapping(address => uint256) public share;
+  mapping(address => uint256) public withdrawals;
+
   function ragequit() external {
     if (msg.sender != admin) {
       revert ErrUnauthorized();
@@ -36,6 +44,27 @@ contract Ad is ReentrancyGuard {
       block.timestamp - timestamp,
       collateral
     );
+  }
+
+  function markupAmount(
+    address _controller
+  ) public view returns(uint256 balance) {
+    uint256 amount = FixedPointMathLib.fdiv(
+      share[_controller] * excess,
+      revenue * FixedPointMathLib.WAD,
+      FixedPointMathLib.WAD
+    );
+    return amount - withdrawals[msg.sender];
+  }
+
+  function payout() nonReentrant external {
+    uint256 balance = markupAmount(msg.sender);
+    if (balance === 0) {
+      revert ErrValue();
+    }
+
+    withdrawals[msg.sender] += balance;
+    msg.sender.call{value: balance}("");
   }
 
   function set(
@@ -64,8 +93,12 @@ contract Ad is ReentrancyGuard {
       collateral = msg.value-markup;
       timestamp = block.timestamp;
 
+      share[lastController] += taxes;
+      revenue += taxes;
+      excess += markup;
+
       treasury.call{value: taxes}("");
-      lastController.call{value: nextPrice+markup}("");
+      lastController.call{value: nextPrice}("");
     }
   }
 }
