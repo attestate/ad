@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import { Harberger, Perwei } from "./Harberger.sol";
 import { ReentrancyGuard } from "./ReentrancyGuard.sol";
 
+// TODO: These must become owned values
 address constant treasury = 0x1337E2624ffEC537087c6774e9A18031CFEAf0a9;
 address constant admin = 0xee324c588ceF1BF1c1360883E4318834af66366d;
 // NOTE: The tax rate is 1/2629746 per second. The denominator (2629746) is
