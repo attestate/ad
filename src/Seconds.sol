@@ -35,7 +35,7 @@ contract Seconds is ERC20, Owned(msg.sender), ReentrancyGuard {
   }
 
   function withdraw(uint256 _value) public nonReentrant {
-    if (_value > balanceOf[msg.sender]) {
+    if (_value > balanceOf[msg.sender] || _value == 0) {
       revert ErrValue();
     }
 

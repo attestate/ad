@@ -52,34 +52,35 @@ contract SecondsTest is Test {
     minter.mint(token, to, value);
   }
 
-  function testCallWithdrawWithNoBalance() public {
+  function testCallWithdrawWithNoBalance(uint256 value) public {
     assertEq(token.balanceOf(address(this)), 0);
 
-    uint256 value = 1;
     vm.expectRevert(Seconds.ErrValue.selector);
     token.withdraw(value);
   }
 
-  function testMinting() public {
+  function testMinting(uint256 value) public {
     address to = address(this);
-    uint256 value = 123;
     token.mint(to, value);
     assertEq(token.balanceOf(to), value);
   }
 
-  function testWithdrawHalf() public {
+  function testWithdrawAll(uint256 value) public {
     payable(address(token)).transfer(1 ether);
 
     address to = address(this);
-    uint256 value = 2;
     token.mint(to, value);
     assertEq(token.balanceOf(to), value);
 
-    uint256 balance0 = address(this).balance;
-    uint256 half = value/2;
-    token.withdraw(half);
+    uint256 preBalance = address(this).balance;
+    assertEq(token.balanceOf(address(this)), value);
+    vm.assume(value != 0);
+    vm.assume(value < 60 * 60 * 24 * 356 * 10000);
+    uint256 amount = token.share(value);
+    token.withdraw(value);
 
-    assertEq(address(this).balance-balance0, 0.5 ether);
-    assertEq(address(token).balance, 0.5 ether);
+    assertEq(token.balanceOf(address(this)), 0);
+    assertEq(address(this).balance-preBalance, 1 ether);
+    assertEq(address(token).balance, 0);
   }
 }

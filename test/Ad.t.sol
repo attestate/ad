@@ -34,10 +34,10 @@ contract AdTest is Test {
     token.setAuthority(address(ad));
   }
 
-  function testSetForFree() public {
+  function testSetForFree(uint96 value) public {
     string memory title = "Hello world";
     string memory href = "https://example.com";
-    ad.set{value: 0}(title, href);
+    ad.set{value: value}(title, href);
   }
 
   function testReSetForFree() public {
@@ -84,10 +84,9 @@ contract AdTest is Test {
     setter.set(ad, title, href, setterValue);
   }
 
-  function testSet() public {
+  function testSet(uint96 value) public {
     string memory title = "Hello world";
     string memory href = "https://example.com";
-    uint256 value = 1;
     ad.set{value: value}(title, href);
 
     assertEq(ad.controller(), address(this));
@@ -95,10 +94,9 @@ contract AdTest is Test {
     assertEq(ad.timestamp(), block.timestamp);
   }
 
-  function testTaxationAfterAMonth() public {
+  function testTaxationAfterAMonth(uint96 value) public {
     string memory title = "Hello world";
     string memory href = "https://example.com";
-    uint256 value = 1 ether;
     ad.set{value: value}(title, href);
 
     uint256 collateral0 = ad.collateral();
@@ -137,7 +135,7 @@ contract AdTest is Test {
     setter.set(ad, title, href, setterValue);
   }
 
-  function testReSet() public {
+  function testReSet(uint96 setterValue) public {
     string memory title = "Hello world";
     string memory href = "https://example.com";
     uint256 value = denominator;
@@ -154,11 +152,13 @@ contract AdTest is Test {
     assertEq(nextPrice1, ad.collateral()-1);
     assertEq(taxes1, 1);
 
+    vm.assume(setterValue > denominator);
+    vm.assume(setterValue < 1_000_000_000_000);
+    vm.assume(setterValue % 2 == 0);
     Setter setter = new Setter();
-    payable(address(setter)).transfer(1 ether);
+    payable(address(setter)).transfer(setterValue);
     uint256 balance0 = address(this).balance;
 
-    uint256 setterValue = 1 ether;
     setter.set(ad, title, href, setterValue);
 
     assertEq(token.balanceOf(address(this)), 1);
@@ -175,7 +175,7 @@ contract AdTest is Test {
     assertEq(ad.timestamp(), block.timestamp);
   }
 
-  function testRedeemForETH() public {
+  function testRedeemForETH(uint96 setterValue) public {
     string memory title = "Hello world";
     string memory href = "https://example.com";
     uint256 value = denominator;
@@ -192,11 +192,13 @@ contract AdTest is Test {
     assertEq(nextPrice1, ad.collateral()-1);
     assertEq(taxes1, 1);
 
+    vm.assume(setterValue > denominator);
+    vm.assume(setterValue < 1_000_000_000_000);
+    vm.assume(setterValue % 2 == 0);
     Setter setter = new Setter();
-    payable(address(setter)).transfer(1 ether);
+    payable(address(setter)).transfer(setterValue);
     uint256 balance0 = address(this).balance;
 
-    uint256 setterValue = 1 ether;
     setter.set(ad, title, href, setterValue);
 
     assertEq(token.balanceOf(address(this)), 1);
