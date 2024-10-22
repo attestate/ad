@@ -65,8 +65,8 @@ contract SecondsTest is Test {
     assertEq(token.balanceOf(to), value);
   }
 
-  function testWithdrawAll(uint256 value) public {
-    payable(address(token)).transfer(1 ether);
+  function testWithdrawAll(uint256 value, uint96 balanceValue) public {
+    payable(address(token)).transfer(balanceValue);
 
     address to = address(this);
     token.mint(to, value);
@@ -74,13 +74,14 @@ contract SecondsTest is Test {
 
     uint256 preBalance = address(this).balance;
     assertEq(token.balanceOf(address(this)), value);
+    vm.assume(balanceValue != 0);
     vm.assume(value != 0);
     vm.assume(value < 60 * 60 * 24 * 356 * 10000);
     uint256 amount = token.share(value);
     token.withdraw(value);
 
     assertEq(token.balanceOf(address(this)), 0);
-    assertEq(address(this).balance-preBalance, 1 ether);
+    assertEq(address(this).balance-preBalance, balanceValue);
     assertEq(address(token).balance, 0);
   }
 }
