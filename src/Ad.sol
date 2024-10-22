@@ -4,9 +4,11 @@ pragma solidity ^0.8.13;
 import { Harberger, Perwei } from "./Harberger.sol";
 import { ReentrancyGuard } from "./ReentrancyGuard.sol";
 
-// TODO: These must become owned values
+interface IERC20 {
+  function mint(address to, uint256 value) external;
+}
+
 address constant treasury = 0x1337E2624ffEC537087c6774e9A18031CFEAf0a9;
-address constant admin = 0xee324c588ceF1BF1c1360883E4318834af66366d;
 // NOTE: The tax rate is 1/2629746 per second. The denominator (2629746) is
 // seconds in a month. Practically, it means that a self-assessed key worth 1
 // ether will accumulate a tax obligation of 1 ether/month.
@@ -15,20 +17,19 @@ uint256 constant denominator  = 2629746;
 contract Ad is ReentrancyGuard {
   error ErrValue();
   error ErrUnauthorized();
+  error ErrCall();
 
   string public title;
   string public href;
+
+  address public token;
 
   address public controller;
   uint256 public collateral;
   uint256 public timestamp;
 
-  function ragequit() external {
-    if (msg.sender != admin) {
-      revert ErrUnauthorized();
-    }
-
-    admin.call{value: address(this).balance}("");
+  constructor(address _token) {
+    token = _token;
   }
 
   function price() public view returns (uint256 nextPrice, uint256 taxes) {
@@ -51,12 +52,13 @@ contract Ad is ReentrancyGuard {
       timestamp = block.timestamp;
     } else {
       (uint256 nextPrice, uint256 taxes) = price();
-
       if (msg.value < nextPrice+2) {
         revert ErrValue();
       }
+
       uint256 difference = msg.value-nextPrice;
       uint256 markup = difference/2;
+      uint256 timeDifference = block.timestamp - timestamp;
 
       address lastController = controller;
       title = _title;
@@ -65,8 +67,14 @@ contract Ad is ReentrancyGuard {
       collateral = msg.value-markup;
       timestamp = block.timestamp;
 
-      treasury.call{value: taxes}("");
-      lastController.call{value: nextPrice+markup}("");
+      (bool treasurySuccess,) = treasury.call{value: taxes}("");
+      (bool tokenSuccess,) = token.call{value: markup}("");
+      if (!treasurySuccess || !tokenSuccess) {
+        revert ErrCall();
+      }
+      lastController.call{value: nextPrice}("");
+
+      IERC20(token).mint(lastController, timeDifference);
     }
   }
 }

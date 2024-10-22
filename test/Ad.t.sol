@@ -3,7 +3,8 @@ pragma solidity ^0.8.6;
 
 import "forge-std/Test.sol";
 
-import { Ad, denominator, treasury, admin } from "../src/Ad.sol";
+import { Ad, denominator, treasury } from "../src/Ad.sol";
+import { Seconds } from "../src/Seconds.sol";
 
 contract Setter {
   receive() external payable {}
@@ -19,10 +20,18 @@ contract Setter {
 
 contract AdTest is Test {
   Ad ad;
+  Seconds token;
   receive() external payable {}
 
   function setUp() public {
-    ad = new Ad();
+    string memory name = "TIME";
+    string memory symbol = "TIME";
+    uint8 decimals = 18;
+    token = new Seconds(name, symbol, decimals);
+
+    ad = new Ad(address(token));
+
+    token.setAuthority(address(ad));
   }
 
   function testSetForFree() public {
@@ -43,12 +52,16 @@ contract AdTest is Test {
     assertEq(price, 0);
     assertEq(taxes, 0);
     Setter setter = new Setter();
-    payable(address(setter)).transfer(1 ether);
     uint256 setterValue = 2;
+    payable(address(setter)).transfer(setterValue);
+
     uint256 balance0 = address(this).balance;
     setter.set(ad, title, href, setterValue);
+
+    assertEq(token.balanceOf(address(this)), 0);
+    assertEq(address(token).balance, 1);
     uint256 balance1 = address(this).balance;
-    assertEq(balance1 - balance0, 1);
+    assertEq(balance1 - balance0, 0);
     assertEq(ad.controller(), address(setter));
     assertEq(ad.collateral(), 1);
     assertEq(ad.timestamp(), block.timestamp);
@@ -148,11 +161,13 @@ contract AdTest is Test {
     uint256 setterValue = 1 ether;
     setter.set(ad, title, href, setterValue);
 
+    assertEq(token.balanceOf(address(this)), 1);
+    assertEq(address(token).balance, (setterValue - denominator) / 2);
+
     uint256 difference = setterValue - nextPrice1;
     uint256 markup = difference / 2;
     uint256 balance1 = address(this).balance;
-    assertEq(balance1 - balance0, nextPrice1+markup);
-
+    assertEq(balance1 - balance0, nextPrice1);
 
     uint256 collateral1 = ad.collateral();
     assertEq(ad.controller(), address(setter));
@@ -160,28 +175,42 @@ contract AdTest is Test {
     assertEq(ad.timestamp(), block.timestamp);
   }
 
-  function testRagequitUnauthorized() public {
+  function testRedeemForETH() public {
     string memory title = "Hello world";
     string memory href = "https://example.com";
-    uint256 value = 1;
+    uint256 value = denominator;
     ad.set{value: value}(title, href);
 
-    vm.expectRevert(Ad.ErrUnauthorized.selector);
-    ad.ragequit();
-  }
+    uint256 collateral0 = ad.collateral();
+    assertEq(ad.controller(), address(this));
+    assertEq(collateral0, value);
+    assertEq(ad.timestamp(), block.timestamp);
 
-  function testRagequitAsAdmin() public {
-    string memory title = "Hello world";
-    string memory href = "https://example.com";
-    uint256 value = 1;
-    ad.set{value: value}(title, href);
+    vm.warp(block.timestamp+1);
 
-    uint256 balance0 = admin.balance;
+    (uint256 nextPrice1, uint256 taxes1) = ad.price();
+    assertEq(nextPrice1, ad.collateral()-1);
+    assertEq(taxes1, 1);
 
-    vm.prank(admin);
-    ad.ragequit();
+    Setter setter = new Setter();
+    payable(address(setter)).transfer(1 ether);
+    uint256 balance0 = address(this).balance;
 
-    uint256 balance1 = admin.balance;
-    assertEq(balance0+value, balance1);
+    uint256 setterValue = 1 ether;
+    setter.set(ad, title, href, setterValue);
+
+    assertEq(token.balanceOf(address(this)), 1);
+    assertEq(address(token).balance, (setterValue - denominator) / 2);
+
+    uint256 tokenBalance = 1;
+    uint256 amount = token.share(tokenBalance);
+    assertEq(token.totalSupply(), tokenBalance);
+    assertEq(amount, address(token).balance);
+
+    uint256 tokenETHBalance = address(token).balance;
+    uint256 balance1 = address(this).balance;
+    token.withdraw(tokenBalance);
+    assertEq(address(token).balance, 0);
+    assertEq(address(this).balance, balance1+tokenETHBalance);
   }
 }
