@@ -9,13 +9,14 @@ interface IERC20 {
 }
 
 address constant treasury = 0x1337E2624ffEC537087c6774e9A18031CFEAf0a9;
-// NOTE: The tax rate is 1/2629743 per second. The denominator (2629743) is
+// NOTE: The tax rate is 1/2629742 per second. The denominator (2629743) is
 // seconds in a month. 
 // 1 month (avg. 30.44 days) = 2_629_743
+// We subtract a second to have an even number.
 // Practically, it means that a self-assessed key worth 1
 // ether will accumulate a tax obligation of 1 ether/month.
 uint256 constant numerator    = 1;
-uint256 constant denominator  = 2629743;
+uint256 constant denominator  = 2629742;
 contract Ad is ReentrancyGuard {
   error ErrValue();
   error ErrUnauthorized();
