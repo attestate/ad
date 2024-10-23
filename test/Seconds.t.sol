@@ -32,6 +32,7 @@ contract SecondsTest is Test {
   function testSetNewAuthority() public {
     address newAuthority = address(0);
     token.setAuthority(newAuthority);
+    assertEq(token.authority(), newAuthority);
   }
 
   function testSetAuthorityUnauthorized() public {
@@ -77,7 +78,6 @@ contract SecondsTest is Test {
     vm.assume(balanceValue != 0);
     vm.assume(value != 0);
     vm.assume(value < 60 * 60 * 24 * 365 * 10000);
-    uint256 amount = token.share(value);
     token.withdraw(value);
 
     assertEq(token.balanceOf(address(this)), 0);

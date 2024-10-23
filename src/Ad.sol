@@ -17,6 +17,9 @@ address constant treasury = 0x1337E2624ffEC537087c6774e9A18031CFEAf0a9;
 // ether will accumulate a tax obligation of 1 ether/month.
 uint256 constant numerator    = 1;
 uint256 constant denominator  = 2629742;
+// TODO: Add a function that allows to shut down this contract gracefully in
+// case of an update, by e.g. allowing an admit to call a function that sends
+// the leftover collateral to the lastController.
 contract Ad is ReentrancyGuard {
   error ErrValue();
   error ErrUnauthorized();
@@ -54,6 +57,24 @@ contract Ad is ReentrancyGuard {
       collateral = msg.value;
       timestamp = block.timestamp;
     } else {
+      // NOTE on the calculation of the markup: The term "markup" refers to the
+      // buyer premium, which is the difference between the last price
+      // (nextPrice) and the new price (msg.value).
+      //
+      // In this contract, the markup is divided by two for two reasons:
+      //
+      // 1. Half is sent to the token contract to reward the previous ad owner.
+      // 2. The other half ensures there is enough collateral to cover the tax
+      // obligations.
+      //
+      //
+      // Therefore, `msg.value` must be at least `nextPrice + 2 Wei`:
+      //
+      // - 1 Wei for the premium sent to the token contract.
+      // - 1 Wei to maintain sufficient collateral for taxation.
+      //
+      // This setup ensures both incentive alignment and compliance with tax
+      // obligations.
       (uint256 nextPrice, uint256 taxes) = price();
       if (msg.value < nextPrice+2) {
         revert ErrValue();

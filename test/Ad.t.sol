@@ -38,6 +38,8 @@ contract AdTest is Test {
     string memory title = "Hello world";
     string memory href = "https://example.com";
     ad.set{value: value}(title, href);
+    assertEq(ad.title(), title);
+    assertEq(ad.href(), href);
   }
 
   function testReSetForFree() public {
@@ -197,7 +199,6 @@ contract AdTest is Test {
     vm.assume(setterValue % 2 == 0);
     Setter setter = new Setter();
     payable(address(setter)).transfer(setterValue);
-    uint256 balance0 = address(this).balance;
 
     setter.set(ad, title, href, setterValue);
 
