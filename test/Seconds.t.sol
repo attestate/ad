@@ -76,7 +76,7 @@ contract SecondsTest is Test {
     assertEq(token.balanceOf(address(this)), value);
     vm.assume(balanceValue != 0);
     vm.assume(value != 0);
-    vm.assume(value < 60 * 60 * 24 * 356 * 10000);
+    vm.assume(value < 60 * 60 * 24 * 365 * 10000);
     uint256 amount = token.share(value);
     token.withdraw(value);
 
