@@ -1,5 +1,7 @@
 # Ad
 
+_readme currently outdated_
+
 ## How does it work?
 
 This contract will give you access to set an ad on https://kiwinews.xyz. The ad will be, for example, permanently available as the top third link here:
