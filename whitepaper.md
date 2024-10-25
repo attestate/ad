@@ -39,6 +39,9 @@ The figure below shows the linear price depreciation, dutch auction style.
 As the tax period $T$ remains constant, and since the $(1 - \frac{t - t_0}{T})$
 part will trend to zero throughout the tax period, the price depreciation of
 the property in absolute terms is determined by the size of the collateral $c$.
+This can be seen on the above figure on the right graph where the initial price,
+or for that matter, the size of the collateral determines the steepness of the
+depreciation function.
 
 
 ## References 
