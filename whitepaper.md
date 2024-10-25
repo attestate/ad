@@ -35,13 +35,42 @@ The figure below shows the linear price depreciation, dutch auction style.
 
 ![Untitled-2024-10-25-1225 (1)](https://github.com/user-attachments/assets/70446025-6089-4aea-b836-5af73ef949b4)
 
-
 As the tax period $T$ remains constant, and since the $(1 - \frac{t - t_0}{T})$
 part will trend to zero throughout the tax period, the price depreciation of
 the property in absolute terms is determined by the size of the collateral $c$.
 This can be seen on the above figure on the right graph where the initial price,
 or for that matter, the size of the collateral determines the steepness of the
 depreciation function.
+
+We call this concept Depreciating Licenses.
+
+## Problems with Depreciating Licenses
+
+An simple implementation of depreciating licenses has a problem where the
+premium isn't sent to the seller. The example below describes such a 
+scenario:
+
+```mermaid
+sequenceDiagram
+     participant Alice
+     participant Ad
+     participant Bob
+     participant Treasury
+
+     Note over Alice,Bob: Step 1: Initial Purchase
+     Alice->>Ad: Pay 0.5 ETH
+     Note right of Ad: Ad owned by Alice<br/>Collateral: 0.5 ETH
+
+     Note over Alice,Bob: Step 2: After 15 days
+     Bob->>Ad: Pay 1.0 ETH
+     Ad->>Alice: Return remaining collateral 0.25 ETH
+     Ad->>Treasury: Send taxes 0.25 ETH
+     Note right of Ad: Ad owned by Bob<br/>Collateral: 1.0 ETH
+```
+
+After 15 days half of Alice's 0.5 ETH of collateral is left. But Bob
+pays a  premium of 0.75 ETH. However, Alice doesn't receive these 0.75 ETH
+of difference on top of also receiving back her unused 0.25 ETH.
 
 
 ## References 
