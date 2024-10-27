@@ -23,7 +23,8 @@ Unlimited private property titles, where the owner doesn't have to pay
 demand-based recurring fees, lead to inefficient allocation and gives the
 owners monopoly power. 
 
-![image](https://github.com/user-attachments/assets/5787f75a-37a3-4828-b934-01e22144cbc7)
+![image](https://github.com/user-attachments/assets/aec18551-cf40-4358-bc45-dd4facf84f1c)
+
 
 The most famous Georgist example of such a dynamic is exemplified by the above
 picture of a bill board reading "EVERYBODY WORKS BUT THE VACANT LOT," in which
