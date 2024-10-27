@@ -1,22 +1,49 @@
 # Onchain Ads
 
-Digital assets thrive on speculation. While our previous experiments with
-Harberger taxes and partial common ownership showed promise, they missed a
-crucial element: enabling price discovery through "scalpers." Without premiums
-exchanging hands between buyers and sellers, the market lacked the speculative
-layer that drives early adoption.
+Author: Tim Daubenschuetz
+
+Digital assets thrive on speculation. While our previous experiments at Kiwi
+News with Harberger taxes and partial common ownership showed promise, they
+missed a crucial element: enabling price discovery through "scalpers." Without
+premiums exchanging hands between buyers and sellers, the market lacked the
+speculative layer that drives early adoption.
 
 Oh et al. [1] demonstrate that scalpers play an essential role in bootstrapping
 demand for digital assets. They act as market makers, providing liquidity and
 price discovery. This insight led us to redesign our onchain ad mechanism to
 explicitly encourage early speculation.
 
-## Harberger tax pricing
+## Why Demand-based Recurring Fees?
 
 Pricing an ad with Harberger taxes has the benefit of the tax burden increasing
-with the ad's rising demand. Unlimited private property rights where the owner
-doesn't have to pay demand-based recurring fees leads to inefficient allocation
-and gives the owner monopoly power. 
+with the ad's rising demand. This improves allocative efficency for an asset
+compared to the efficiency of a privately owned asset.
+
+Unlimited private property titles, where the owner doesn't have to pay
+demand-based recurring fees, lead to inefficient allocation and gives the
+owners monopoly power. 
+
+![image](https://github.com/user-attachments/assets/5787f75a-37a3-4828-b934-01e22144cbc7)
+
+The most famous Georgist example of such a dynamic is exemplified by the above
+picture of a bill board reading "EVERYBODY WORKS BUT THE VACANT LOT," in which
+the private owner stated to sell the lot only by the time it had doubled in
+value, hence demonstrating the allocative inefficiency of private inner city
+real estate.
+
+As Georgists argue, an ideal inner city land policy then makes land so
+expensive to own over time, the cost incentivizes the owner to perfectly
+utilize the land, which is why Georgist are known for promoting a continuous
+land-value tax where the its value is assessed annually, but the assessment is
+only made on the "unimproved land value."
+
+![Untitled-2024-10-25-1225 (3)](https://github.com/user-attachments/assets/3f663633-afdc-4581-b643-0570924c88a0)
+
+As crypto currency enthusiasts we understand the value of "network goods,"
+goods which rise in value proportional to how well they propagate in the
+network. The above graph exemplifies how this can be true for real estate too
+where a dirty power plant is a much worse neighbor to have than a modern cafe
+or a gym and a theatre.
 
 ### Discussion on property right limitations
 
