@@ -42,9 +42,19 @@ considers the "unimproved land value."
 
 As crypto currency enthusiasts we understand the value of "network goods,"
 goods which rise in value proportional to how well they propagate in the
-network. The above graph exemplifies how this can be true for real estate too
-where a dirty power plant is a much worse neighbor to have than a modern cafe
-or a gym and a theatre.
+network. The above image exemplifies how this can be true for real estate too.
+As a land owner, having a dirty power plant as a neighbor is much worse than
+having nice cafes and gyms nearby. The absurdity of inner city real estate is
+that while the land appreciates from the networked improvements of the
+surrounding parcels, the owner itself only has limited capability of increasing
+the value of their own parcel. In that way, an inner city property owner isn't
+directly in control over their land's value, the network is.
+
+This effect is what LTV is trying to dampen. With land being the source of all
+goods in the economy, and since it can create immense amounts of wealth without
+necessarily needing ongoing investment, taxing land's value would ensure that
+owners productively use the land or sell it so someone who can utilize it
+best.
 
 ### Discussion on property right limitations
 
@@ -57,19 +67,24 @@ Demand-based recurring fees limit ownership by imposing a variable fee on
 holding a good. This fee is set such that, unless the owner makes good use of
 the property, it's not profitable for the owner to underutilize the good.
 
-Land value tax, but also Harberger taxes are types of demand-based recurring
+Land value tax, but also Harberger taxes, are types of demand-based recurring
 fees.
 
 ## Harberger taxes
 
 Compared to LVT, Harberger taxes decentralize the aspect of evaluating a
-property by requiring the owner to self-assess its value. Whereas the valuation
-process in LVT is maliciously capturable through corrupting the centralized
-assessors, in the Harberger tax scheme, every owner self-assesses their
-property, will however, also have sell it at that self-assessed price
-immediately. 
+property by requiring the owner to self-assess its value. Whereas the land
+valuation process in LVT is maliciously capturable through corrupting the
+centralized assessors, in the Harberger tax scheme, every owner self-assessing
+their property, will however, also have to sell it at that self-assessed price
+immediately. In that way, prices in the Harberger tax model are self-correcting.
 
-The table below compared LVT and Harberger taxes:
+1. Self-assess the value of your land too low, and therefore pay less taxes,
+   and someone might buy it from you.
+2. Self-assess the value of your land too high, and hence make it less likely
+   to be bought, and you're going to pay a lot of taxes.
+
+The table below compares LVT and Harberger taxes:
 
 | Aspect | Land Value Tax | Harberger Tax |
 |---------|----------------|---------------|
@@ -78,30 +93,34 @@ The table below compared LVT and Harberger taxes:
 | Stability | Owner controls sales timing | Property can be bought any time |
 | Gaming | Corruption | Some strategic pricing |
 
-Selling at the self-assessed price immediately can can have bespoke pros and
-cons depending on what type of asset that policy is applied to. But especially
-the aspect that a sale can happen instantly and without the confirmation of the
-current owner can create fundamental problems in many asset types, for example
-[2]:
+We can see that considering all aspects, Harberger taxes have the benefit of
+preventing capturing the assessor.
+
+However, selling at the self-assessed price immediately can have bespoke pros
+and cons depending on the type of asset. Especially the aspect that a sale can
+happen instantly and without the confirmation of the current owner can create
+fundamental problems in many asset markets, for example [2]:
 
 1. An ENS name that's instantly transferred to a highest bidder can make the
    old owner lose a lot of money.
 2. A restaurant which had to change its location "overnight" may lose many
-   long-terms customers if their new location is far away.
+   long-terms customers if their new location is too far away.
 
-But there are also types of assets where a high turn over rate is actually a
-good thing. There is, for example, no harm done with replacing an online ad of
-a social media website several times an hour. In fact, users might even find it
-enriching. Which is why we see ads, implemented as onchain, depreciating
-licenses as a well-fitting model for pioneering a first fully-working Harberger
-tax scheme on Ethereum.
+But there are types of assets where a high turn over rate is actually a good
+thing. There is, for example, no harm done with replacing an online ad of a
+social media website several times an hour. In fact, users might even find it
+enriching. Which is why we see onchain ads, implemented as depreciating
+licenses, as a well-fitting model for pioneering a first fully-working
+Harberger tax scheme on Ethereum.
 
 ### Onchain Ads as Depreciating Licenses
 
 In many ways, website real estate is similar to that of inner cities. There's
-only a limited amount of space and visitors' attention is scarce.
+only a limited amount of space and visitors' attention is scarce. The website's
+curators are responsible for increasing the ad space's value, not the ad
+publisher etc..
 
-We're implementing a Harberger tax mechanims that  follows a linear price decay
+We're implementing a Harberger tax mechanims that follows a linear price decay
 function:
 
 $$
@@ -120,25 +139,35 @@ dutch auction.
 
 ![Untitled-2024-10-25-1225 (2)](https://github.com/user-attachments/assets/20eaeb82-6248-4230-82d1-c35e08530460)
 
-As the tax period $T$ remains constant, and since the $(1 - \frac{t - t_0}{T})$
-part will trend to zero throughout the tax period, the price depreciation of
-the property in absolute terms is determined by the size of the collateral $c$.
-This can be seen on the above figure on the lower graph where the initial price,
-or for that matter, the size of the collateral determines the steepness of the
-depreciation function.
+In the example above, the tax period is always 30 days, which means that the
+entire collateral is taxed over that period. Notice what this does to the
+steepness of price decay. The higher the initial price $p(0)$, the more
+collateral (in absolute terms) will depreciate during the tax period. The lower
+chart shows this more clearly by comparing the holding costs of the same ad, at
+two different price points for a roughly similar-length period.
+
+In more mathematicaly terms: As the tax period $T$ remains constant, and since
+the $(1 - \frac{t - t_0}{T})$ part will trend to zero throughout the tax
+period, the price depreciation of the property in absolute terms is determined
+by the size of the collateral $c$. This can also be seen in the above figure on
+the lower graph where the initial price, or for that matter, the size of the
+collateral determines the steepness of the depreciation function.
 
 We call this concept Depreciating Licenses.
 
-### Basic Implementation
+## Implementing Depreciating Licenses in Solidity
 
-A basic implementation of depreciating licenses, using the $p(t)$ formula, has
-users deposit Ether as collateral into a smart contract we call "Ad."
+Now, when actually implementing the theory of LVT, Harberger taxes and
+depreciating licenses into Solitity there are all sorts of challenges which
+arise from the pseudonomous nature of online identity. We'll shed some lights on
+the challenges and how we've overcome them in our implementation.
 
-Throughout a user's holding period the collateral depreciates in value until
-the owner is overbid.
-
-Overbidding occurrs as a single transaction sending the last owner's collateral
-back, sending the fees to a treasury and accepting the new owner's collateral.
+First of all, a basic implementation of depreciating licenses, using the $p(t)$
+formula, has users deposit Ether as collateral into a smart contract we call
+"Ad." Throughout a user's holding period the collateral then depreciates in
+value until the owner is overbid. Overbidding occurrs as a single transaction
+sending the last owner's collateral back, sending the fees to a treasury and
+accepting the new owner's collateral.
 
 The figure below visualizes that process:
 
@@ -162,24 +191,33 @@ sequenceDiagram
      end
 ```
 
-That system is maximally basic. The grey background signifies that sending of
-Ether during the overbidding happens throughout a single transaction.
+What we can see here is that Alice initially buys the Ad for 1 ETH and that her
+collateral depreciates over 15 days by 50% (at this point, the ad is worth 0.5
+ETH). Bob then buys the ad for 1 ETH, and, in the process of overbidding Alice
+sending her leftover collateral back and the tax revenue (0.5 ETH) to the
+treasury. 
 
-One challenge with designing the system like this is that it's not passing
-along the higher sales price to Alice. What economists call a buyer's premium
-(0.5 ETH) isn't passed along. Instead, Alice gets sent back her 0.5 ETH of
-leftover collateral although the ad is now worth 1 ETH. In the above
-implementation, this weakens the motivation to disover and hold onto a
-Harberger-tax priced property.
+Note how Bobs interactions are highlighted with a background in grey.
+That is to show that Bob buying the ad for 1 ETH, and sending Alice's remaining
+collateral back, and sending the taxes to the treasury is just done in one
+transaction, all triggered by Bob overbidding Alice.
 
-In practice, a problem arises with this implementation when it has to compete
-with other digital property titles, which are usually priced through the
-regular private ownership mechanism. Private property price discovery works
-well as utility value and speculative value successfully generate a flywheel.
-And while, indeed, the utility value of the onchain ad is also a motivation for
-scalpers to find underpriced ad opportunities, in practice, we've observed that
-it alone is too weak for generating a flywheel, especially when private
-ownership is a viable model for substitution.
+One challenge, however, with designing the system like this is that it's not
+passing along the higher sales price of Bob (1 ETH) to Alice. What economists
+call a buyer's premium (0.5 ETH) isn't passed along. Instead, Alice gets sent
+back her 0.5 ETH of leftover collateral although the ad is now worth 1 ETH. In
+the above implementation, this weakens participants' motivation to disover and
+hold onto a Harberger-tax priced property. That problem specifically arises as
+most digital property is priced through private ownership, giving scalpers both
+the possibility of using an bought asset's utility and speculative value.
+
+Private property price discovery works well as utility value and speculative
+value successfully generate a flywheel to incentivize trading. And while,
+indeed, the utility value of the onchain ad may also be a motivation for
+ad-publishing scalpers to trade the ad, in practice, we've observed that its
+utility value alone is too weak for generating a price discovery flywheel,
+especially when private ownership as a substitution model for exploiting price
+differentials is a widely available alternative.
 
 ### Implementation Challenges in Solidity
 
