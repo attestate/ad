@@ -17,7 +17,7 @@ explicitly encourage early speculation.
 
 Pricing an ad with Harberger taxes has the benefit of the tax burden increasing
 with the ad's rising demand. This improves allocative efficiency for an asset
-compared to privately owned asset.
+compared to privately owned assets.
 
 Unlimited private property titles, where the owner doesn't have to pay
 demand-based recurring fees, lead to inefficient allocations and give the
@@ -26,7 +26,7 @@ owners monopoly power.
 ![image](https://github.com/user-attachments/assets/aec18551-cf40-4358-bc45-dd4facf84f1c)
 
 The most famous Georgist example of such a dynamic is exemplified by the above
-picture of a bill board reading "EVERYBODY WORKS BUT THE VACANT LOT," in which
+picture of a billboard reading "EVERYBODY WORKS BUT THE VACANT LOT," in which
 the private owner states to sell the lot only by the time it has doubled in
 value, hence demonstrating the allocative inefficiency of private inner city
 real estate.
@@ -57,7 +57,7 @@ best.
 
 But while true private ownership is unlimited over time, meaning that no one
 but the current owner has full and unlimited control over who else may own
-their property in the future. This causes inefficient allocation for unique and
+their property in the future. This causes inefficient allocation of unique and
 non-fungible goods and, in turn, leads to bad prices.
 
 Demand-based recurring fees limit ownership by imposing a variable fee on
@@ -74,7 +74,7 @@ property by requiring the owner to self-assess its value. Whereas the land
 valuation process in LVT is maliciously capturable through corrupting the
 centralized assessors, in the Harberger tax scheme, every owner self-assessing
 their property will also have to sell it at that self-assessed price
-immediately. In that way, prices in the Harberger tax model is self-correcting.
+immediately. In that way, prices in the Harberger tax model are self-correcting.
 
 1. Self-assess the value of your land too low, and therefore pay less taxes,
    and someone might buy it from you.
@@ -115,7 +115,7 @@ positive externality. There is, for example, no harm done with replacing an
 online ad on a social media website several times an hour. In fact, users might
 even find that it enriches their experience. Which is why we see onchain ads,
 implemented as depreciating licenses, as a well-fitting model for pioneering a
-first fully-working Harberger tax scheme on Ethereum.
+Harberger tax scheme on Ethereum.
 
 ### Onchain Ads as Depreciating Licenses
 
@@ -124,7 +124,7 @@ only a limited amount of space and visitors' attention is scarce. The website's
 curators are responsible for increasing the ad space's value, not the ad
 publisher etc..
 
-We're implementing a Harberger tax mechanims that follows a linear price decay
+We're implementing a Harberger tax mechanism that follows a linear price decay
 function:
 
 $$
@@ -150,7 +150,7 @@ collateral (in absolute terms) will depreciate during the tax period. The lower
 chart shows this more clearly by comparing the holding costs of the same ad, at
 two different price points for a roughly similar-length period.
 
-In more mathematicaly terms: As the tax period $T$ remains constant, and since
+In more mathematical terms: As the tax period $T$ remains constant, and since
 the $(1 - \frac{t - t_0}{T})$ part will trend to zero throughout the tax
 period, the price depreciation of the property in absolute terms is determined
 by the size of the collateral $c$. This can also be seen in the above figure on
@@ -162,14 +162,14 @@ We call this concept Depreciating Licenses.
 ## Implementing Depreciating Licenses in Solidity
 
 Now, when actually implementing the theory of LVT, Harberger taxes and
-depreciating licenses into Solitity there are all sorts of challenges which
-arise from the pseudonomous nature of online identity. We'll shed some lights on
+depreciating licenses into Solidity there are all sorts of challenges which
+arise from the pseudonomous nature of online identity. We'll shed some light on
 the challenges and how we've overcome them in our implementation.
 
 First of all, a basic implementation of depreciating licenses, using the $p(t)$
 formula, has users deposit Ether as collateral into a smart contract we call
 "Ad." Throughout a user's holding period the collateral then depreciates in
-value until the owner is overbid. Overbidding occurrs as a single transaction
+value until the owner is overbid. Overbidding occurs as a single transaction
 sending the last owner's collateral back, sending the fees to a treasury and
 accepting the new owner's collateral.
 
@@ -201,8 +201,8 @@ ETH). Bob then buys the ad for 1 ETH, and, in the process of overbidding Alice
 sending her leftover collateral back and the tax revenue (0.5 ETH) to the
 treasury. 
 
-Note how Bobs interactions are highlighted with a background in grey.
-That is to show that Bob buying the ad for 1 ETH, and sending Alice's remaining
+Note how Bob's interactions are highlighted with a background in grey. That is
+to show that Bob buying the ad for 1 ETH, and sending Alice's remaining
 collateral back, and sending the taxes to the treasury is just done in one
 transaction, all triggered by Bob overbidding Alice.
 
@@ -213,22 +213,75 @@ back her 0.5 ETH of leftover collateral although the ad is now worth 1 ETH. In
 the above implementation, this weakens participants' motivation to disover and
 hold onto a Harberger-tax priced property. That problem specifically arises as
 most digital property is priced through private ownership, giving scalpers both
-the possibility of using an bought asset's utility and speculative value.
+the possibility of using a bought asset's utility and speculative value.
 
 Private property price discovery works well as utility value and speculative
 value successfully generate a flywheel to incentivize trading. And while,
 indeed, the utility value of the onchain ad may also be a motivation for
 ad-publishing scalpers to trade the ad, in practice, we've observed that its
 utility value alone is too weak for generating a price discovery flywheel,
-especially when private ownership as a substitution model for exploiting price
-differentials is a widely available alternative.
+especially when, to exploit price differentials, private ownership is a widely
+understood substitution model.
 
-### Implementation Challenges in Solidity
+### Adding a buyer's premium
 
-Traditional economists often implicitly assume the actors of their systems to
-be represented as individual humans. But today almost perfect financial
-anonymity is possible creating a need to design financial primitives with
-anonymity in mind.
+Surprisingly, adding a buyer's premium into the above model isn't straight
+forward. Onchain Harberger tax properties require a buffer of Ether that's
+being depreciated. Adding extra logic to deprecate collateral at, for example
+twice the speed may add unnecessary complexity.
+
+So if a premium is paid for acquiring the ad, the new collateral in the ad
+contract must reflect the level of premium paid during the owner replacement.
+Yet, during the overbidding, the excess Ether must also be sent to the seller.
+Which shows that, surprisingly, a premium has to be paid twice. Once as a
+to-be-depreciated buffer, remaining in the ad contract, and once as a one-off
+payment to the seller. This is arguably a bit more involved than, for example,
+selling a used car on a secondary market, where the buyer simply passes a
+premium to the seller.
+
+```mermaid
+sequenceDiagram
+     participant Alice
+     participant Ad
+     participant Bob
+     participant Treasury                                                          
+
+     Note over Alice,Treasury: Day 1: Initial Purchase
+     Alice->>Ad: Buys for 1 ETH
+     Note right of Ad: Collateral: 1 ETH
+
+     Note over Alice,Treasury: After 15 days (50% depreciated), <br />worth 0.5 ETH now.
+
+     rect rgb(240, 240, 240)
+         Bob->>Ad: Buys for 1 ETH
+         Note right of Ad: Collateral: 0.75 ETH
+         Ad->>Alice: Gets back 0.5 ETH + 0.25 ETH (premium)
+         Ad->>Treasury: Receives 0.5 ETH in taxes
+     end
+```
+
+In the above figure, Bob still buys the ad for 1 Ether, however, now the
+premium is:
+
+$$
+premium = \frac{c_{new} - p(t)}{2}
+$$
+
+where:
+- $c_{new}$ is the new collateral amount
+- $p(t)$ is the last price before Bob's bid.
+
+Meaning that Bob is actually re-pricing the ad to 0.75 Ether while forwarding
+0.25 Ether as a one-off payment to Alice.
+
+Beyond the curiosity of having the split the excess Ether in half there's also
+an issue with how a contract best passes on this premium from seller to buyer.
+As perfect financial anonymity is possible today, we have no choice but to
+design primitives with it in mind. The figure below shows one example we've
+encountered where Bob manages to artificially suppress the premium paid to
+Alice by creating two accounts, where Bob's first account buys the ad for a
+small premium, and then ramps up the price through his second account,
+effectively sending the premium from his second, to his first account.
 
 ```mermaid
 sequenceDiagram
@@ -248,32 +301,6 @@ sequenceDiagram
      Ad->>Bob_A1: Gets 0.5 ETH markup
 ```
 
-A simple implementation of depreciating licenses has a problem where the
-premium isn't sent to the seller. The example below describes such a 
-scenario:
-
-```mermaid
-sequenceDiagram
-     participant Alice
-     participant Ad
-     participant Bob
-     participant Treasury
-
-     Note over Alice,Bob: Step 1: Initial Purchase
-     Alice->>Ad: Pay 0.5 ETH
-     Note right of Ad: Ad owned by Alice<br/>Collateral: 0.5 ETH
-
-     Note over Alice,Bob: Step 2: After 15 days
-     Bob->>Ad: Pay 1.0 ETH
-     Ad->>Alice: Return remaining collateral 0.25 ETH
-     Ad->>Treasury: Send taxes 0.25 ETH
-     Note right of Ad: Ad owned by Bob<br/>Collateral: 1.0 ETH
-```
-
-After 15 days half of Alice's 0.5 ETH of collateral is left. But Bob
-pays a  premium of 0.75 ETH. However, Alice doesn't receive these 0.75 ETH
-of difference on top of also receiving back her unused 0.25 ETH.
-
 
 ## References 
 
@@ -289,5 +316,3 @@ of difference on top of also receiving back her unused 0.25 ETH.
 
 1. Price to Demand chart: https://excalidraw.com/#json=YwxqR0Cp1i0a9_Foo-u7H,bPuMWrGwnU7TP10XqG5nZA
 2. p(t) on Desmos: https://www.desmos.com/calculator/dpev9ha8vf
-
-
