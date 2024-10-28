@@ -16,24 +16,23 @@ explicitly encourage early speculation.
 ## Why Demand-based Recurring Fees?
 
 Pricing an ad with Harberger taxes has the benefit of the tax burden increasing
-with the ad's rising demand. This improves allocative efficency for an asset
-compared to the efficiency of a privately owned asset.
+with the ad's rising demand. This improves allocative efficiency for an asset
+compared to privately owned asset.
 
 Unlimited private property titles, where the owner doesn't have to pay
-demand-based recurring fees, lead to inefficient allocation and gives the
+demand-based recurring fees, lead to inefficient allocations and give the
 owners monopoly power. 
 
 ![image](https://github.com/user-attachments/assets/aec18551-cf40-4358-bc45-dd4facf84f1c)
 
-
 The most famous Georgist example of such a dynamic is exemplified by the above
 picture of a bill board reading "EVERYBODY WORKS BUT THE VACANT LOT," in which
-the private owner stated to sell the lot only by the time it had doubled in
+the private owner states to sell the lot only by the time it has doubled in
 value, hence demonstrating the allocative inefficiency of private inner city
 real estate.
 
 As Georgists argue, an ideal inner city land policy then makes land so
-expensive to own over time, the cost incentivizes the owner to perfectly
+expensive to own over time, the cost incentivizes owners to perfectly
 utilize the land, which is why Georgists are known for promoting a continuous
 land-value tax where its value is assessed regularly, but the assessment only
 considers the "unimproved land value."
@@ -53,14 +52,12 @@ directly in control over their land's value, the network is.
 This effect is what LTV is trying to dampen. With land being the source of all
 goods in the economy, and since it can create immense amounts of wealth without
 necessarily needing ongoing investment, taxing land's value would ensure that
-owners productively use the land or sell it so someone who can utilize it
+owners productively use the land or sell it to someone who can utilize it
 best.
 
-### Discussion on property right limitations
-
-True private ownership is unlimited over time, meaning that noone but the
-current owner has full and unlimited control over who else may own that
-property in the future. This causes inefficient allocation for unique and
+But while true private ownership is unlimited over time, meaning that no one
+but the current owner has full and unlimited control over who else may own
+their property in the future. This causes inefficient allocation for unique and
 non-fungible goods and, in turn, leads to bad prices.
 
 Demand-based recurring fees limit ownership by imposing a variable fee on
@@ -76,13 +73,18 @@ Compared to LVT, Harberger taxes decentralize the aspect of evaluating a
 property by requiring the owner to self-assess its value. Whereas the land
 valuation process in LVT is maliciously capturable through corrupting the
 centralized assessors, in the Harberger tax scheme, every owner self-assessing
-their property, will however, also have to sell it at that self-assessed price
-immediately. In that way, prices in the Harberger tax model are self-correcting.
+their property will also have to sell it at that self-assessed price
+immediately. In that way, prices in the Harberger tax model is self-correcting.
 
 1. Self-assess the value of your land too low, and therefore pay less taxes,
    and someone might buy it from you.
 2. Self-assess the value of your land too high, and hence make it less likely
    to be bought, and you're going to pay a lot of taxes.
+
+Harberger taxes incentivize owners to self-assess the price of their property
+truthfully as to what its utility is as they're otherwise going to either lose
+access to the property or pay so much taxes that it makes holding the property
+unprofitable.
 
 The table below compares LVT and Harberger taxes:
 
@@ -93,25 +95,27 @@ The table below compares LVT and Harberger taxes:
 | Stability | Owner controls sales timing | Property can be bought any time |
 | Gaming | Corruption | Some strategic pricing |
 
-We can see that considering all aspects, Harberger taxes have the benefit of
-preventing capturing the assessor.
+Taking a closer look at the above table, we can see that considering all
+aspects, Harberger taxes have the same benefit as LVT, but they also prevent
+the centralized value assessor from being capturable.
 
-However, selling at the self-assessed price immediately can have bespoke pros
-and cons depending on the type of asset. Especially the aspect that a sale can
-happen instantly and without the confirmation of the current owner can create
-fundamental problems in many asset markets, for example [2]:
+As for the stability of a Harberger tax priced property, since it may have to
+be sold instantly, it can have bespoke pros and cons depending on which asset
+types the policy is applied to. Especially the aspect that a sale can happen
+instantly and without the confirmation of the current owner creates fundamental
+problems in many asset markets, for example [2]:
 
 1. An ENS name that's instantly transferred to a highest bidder can make the
    old owner lose a lot of money.
-2. A restaurant which had to change its location "overnight" may lose many
+2. A restaurant which has to change its location "overnight" may lose many
    long-terms customers if their new location is too far away.
 
-But there are types of assets where a high turn over rate is actually a good
-thing. There is, for example, no harm done with replacing an online ad of a
-social media website several times an hour. In fact, users might even find it
-enriching. Which is why we see onchain ads, implemented as depreciating
-licenses, as a well-fitting model for pioneering a first fully-working
-Harberger tax scheme on Ethereum.
+But there are types of assets where a high turn over rate is actually a
+positive externality. There is, for example, no harm done with replacing an
+online ad on a social media website several times an hour. In fact, users might
+even find that it enriches their experience. Which is why we see onchain ads,
+implemented as depreciating licenses, as a well-fitting model for pioneering a
+first fully-working Harberger tax scheme on Ethereum.
 
 ### Onchain Ads as Depreciating Licenses
 
