@@ -34,9 +34,9 @@ real estate.
 
 As Georgists argue, an ideal inner city land policy then makes land so
 expensive to own over time, the cost incentivizes the owner to perfectly
-utilize the land, which is why Georgist are known for promoting a continuous
-land-value tax where the its value is assessed annually, but the assessment is
-only made on the "unimproved land value."
+utilize the land, which is why Georgists are known for promoting a continuous
+land-value tax where its value is assessed regularly, but the assessment only
+considers the "unimproved land value."
 
 ![Untitled-2024-10-25-1225 (3)](https://github.com/user-attachments/assets/3f663633-afdc-4581-b643-0570924c88a0)
 
@@ -57,11 +57,52 @@ Demand-based recurring fees limit ownership by imposing a variable fee on
 holding a good. This fee is set such that, unless the owner makes good use of
 the property, it's not profitable for the owner to underutilize the good.
 
-Harberger taxes propose such recurring fees on the price of a good.
+Land value tax, but also Harberger taxes are types of demand-based recurring
+fees.
 
-### Depreciating licenses
+## Harberger taxes
 
-The Harberger tax mechanism follows a linear decay function:
+Compared to LVT, Harberger taxes decentralize the aspect of evaluating a
+property by requiring the owner to self-assess its value. Whereas the valuation
+process in LVT is maliciously capturable through corrupting the centralized
+assessors, in the Harberger tax scheme, every owner self-assesses their
+property, will however, also have sell it at that self-assessed price
+immediately. 
+
+The table below compared LVT and Harberger taxes:
+
+| Aspect | Land Value Tax | Harberger Tax |
+|---------|----------------|---------------|
+| Valuation | Assessed by gov/market | Self-assessed |
+| Sale | Owner keeps property | Must sell at declared value |
+| Stability | Owner controls sales timing | Property can be bought any time |
+| Gaming | Corruption | Some strategic pricing |
+
+Selling at the self-assessed price immediately can can have bespoke pros and
+cons depending on what type of asset that policy is applied to. But especially
+the aspect that a sale can happen instantly and without the confirmation of the
+current owner can create fundamental problems in many asset types, for example
+[2]:
+
+1. An ENS name that's instantly transferred to a highest bidder can make the
+   old owner lose a lot of money.
+2. A restaurant which had to change its location "overnight" may lose many
+   long-terms customers if their new location is far away.
+
+But there are also types of assets where a high turn over rate is actually a
+good thing. There is, for example, no harm done with replacing an online ad of
+a social media website several times an hour. In fact, users might even find it
+enriching. Which is why we see ads, implemented as onchain, depreciating
+licenses as a well-fitting model for pioneering a first fully-working Harberger
+tax scheme on Ethereum.
+
+### Onchain Ads as Depreciating Licenses
+
+In many ways, website real estate is similar to that of inner cities. There's
+only a limited amount of space and visitors' attention is scarce.
+
+We're implementing a Harberger tax mechanims that  follows a linear price decay
+function:
 
 $$
 p(t) = c \cdot (1 - \frac{t - t_0}{T})
@@ -74,7 +115,8 @@ where:
 - $T$ is the period over which the collateral is fully taxed, e.g., 30 days in
   seconds (2,592,000)
 
-The figure below shows the linear price depreciation, dutch auction style.
+The figure below shows the linear price depreciation, essentially a continuous
+dutch auction.
 
 ![Untitled-2024-10-25-1225 (2)](https://github.com/user-attachments/assets/20eaeb82-6248-4230-82d1-c35e08530460)
 
@@ -196,9 +238,14 @@ of difference on top of also receiving back her unused 0.25 ETH.
 1. Oh, Sebeom and Rosen, Samuel and Zhang, Anthony Lee, Digital Veblen Goods
    (December 5, 2023). Available at SSRN: https://ssrn.com/abstract=4042901 or
    http://dx.doi.org/10.2139/ssrn.4042901
+2. Buterin, Vitalik. "The Endgame of Ethereum Name Service (ENS) Squatting."
+   vitalik.eth.limo, September 9, 2022,
+   https://vitalik.eth.limo/general/2022/09/09/ens.html (accessed October 28,
+   2024).
 
 ## Resources
 
 1. Price to Demand chart: https://excalidraw.com/#json=YwxqR0Cp1i0a9_Foo-u7H,bPuMWrGwnU7TP10XqG5nZA
 2. p(t) on Desmos: https://www.desmos.com/calculator/dpev9ha8vf
+
 
