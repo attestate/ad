@@ -34,28 +34,28 @@ struct Perwei {
 library Harberger {
   function getNextPrice(
     Perwei memory perwei,
-    uint256 blockDiff,
+    uint256 timeDifference,
     uint256 collateral
   ) internal pure returns (uint256, uint256) {
-    uint256 taxes = taxPerBlock(perwei, blockDiff, collateral);
-    int256 diff = int256(collateral) - int256(taxes);
+    uint256 taxes = taxPerSecond(perwei, timeDifference, collateral);
 
-    if (diff <= 0) {
+    if (collateral < taxes) {
       return (0, collateral);
     } else {
-      return (uint256(diff), taxes);
+      return (collateral - taxes, taxes);
     }
   }
 
-  function taxPerBlock(
+  function taxPerSecond(
     Perwei memory perwei,
-    uint256 blockDiff,
+    uint256 timeDifference,
     uint256 collateral
   ) internal pure returns (uint256) {
-    return FixedPointMathLib.fdiv(
-      collateral * blockDiff * perwei.numerator,
-      perwei.denominator * FixedPointMathLib.WAD,
-      FixedPointMathLib.WAD
-    );
+    return
+      FixedPointMathLib.fdiv(
+        collateral * timeDifference * perwei.numerator,
+        perwei.denominator * FixedPointMathLib.WAD,
+        FixedPointMathLib.WAD
+      );
   }
 }
