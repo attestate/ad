@@ -27,35 +27,35 @@ https://en.wikipedia.org/w/index.php?title=Parts-per_notation&oldid=1068959843
 
 */
 struct Perwei {
-    uint256 numerator;
-    uint256 denominator;
+  uint256 numerator;
+  uint256 denominator;
 }
 
 library Harberger {
-    function getNextPrice(
-        Perwei memory perwei,
-        uint256 timeDifference,
-        uint256 collateral
-    ) internal pure returns (uint256, uint256) {
-        uint256 taxes = taxPerSecond(perwei, timeDifference, collateral);
+  function getNextPrice(
+    Perwei memory perwei,
+    uint256 timeDifference,
+    uint256 collateral
+  ) internal pure returns (uint256, uint256) {
+    uint256 taxes = taxPerSecond(perwei, timeDifference, collateral);
 
-        if (collateral < taxes) {
-            return (0, collateral);
-        } else {
-            return (collateral - taxes, taxes);
-        }
+    if (collateral < taxes) {
+      return (0, collateral);
+    } else {
+      return (collateral - taxes, taxes);
     }
+  }
 
-    function taxPerSecond(
-        Perwei memory perwei,
-        uint256 timeDifference,
-        uint256 collateral
-    ) internal pure returns (uint256) {
-        return
-            FixedPointMathLib.fdiv(
-                collateral * timeDifference * perwei.numerator,
-                perwei.denominator * FixedPointMathLib.WAD,
-                FixedPointMathLib.WAD
-            );
-    }
+  function taxPerSecond(
+    Perwei memory perwei,
+    uint256 timeDifference,
+    uint256 collateral
+  ) internal pure returns (uint256) {
+    return
+      FixedPointMathLib.fdiv(
+        collateral * timeDifference * perwei.numerator,
+        perwei.denominator * FixedPointMathLib.WAD,
+        FixedPointMathLib.WAD
+      );
+  }
 }

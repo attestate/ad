@@ -23,9 +23,7 @@ contract Seconds is ERC20, Owned(msg.sender), ReentrancyGuard {
     authority = _newAuthority;
   }
 
-  function share(
-    uint256 _value
-  ) public view returns(uint256 balance) {
+  function share(uint256 _value) public view returns (uint256 balance) {
     uint256 amount = FixedPointMathLib.fdiv(
       _value * address(this).balance,
       totalSupply * FixedPointMathLib.WAD,
@@ -45,7 +43,7 @@ contract Seconds is ERC20, Owned(msg.sender), ReentrancyGuard {
 
     _burn(msg.sender, _value);
 
-    (bool result,) = msg.sender.call{value: amount}("");
+    (bool result, ) = msg.sender.call{value: amount}("");
     if (!result) {
       revert ErrCall();
     }
