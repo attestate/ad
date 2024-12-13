@@ -3,8 +3,7 @@ pragma solidity ^0.8.6;
 
 import "forge-std/Test.sol";
 
-import { Ad, denominator, treasury } from "../src/Ad.sol";
-import { Seconds } from "../src/Seconds.sol";
+import { Ad, denominator, treasury, admin } from "../src/Ad.sol";
 
 contract Setter {
   receive() external payable {}
@@ -20,26 +19,40 @@ contract Setter {
 
 contract AdTest is Test {
   Ad ad;
-  Seconds token;
   receive() external payable {}
 
   function setUp() public {
-    string memory name = "TIME";
-    string memory symbol = "TIME";
-    uint8 decimals = 18;
-    token = new Seconds(name, symbol, decimals);
-
-    ad = new Ad(address(token));
-
-    token.setAuthority(address(ad));
+    ad = new Ad();
   }
 
-  function testSetForFree(uint96 value) public {
+  function testSetForOneMore(uint96 value) public {
+    // NOTE: There can only be maxvalue(uint96) Ether in the Ethereum system.
+    // However, the ad requires the transfer fee to be both present in the
+    // existing collateral, and as the transfer fee sent from the buyer. So
+    // value must maximally ever reach half of maxvalue(uint96) as it has to be
+    // present twice at one time. You can test this assumption by adding + 1 to
+    // (2**96) / 2 (the test will then fail).
+    vm.assume(value < (2**96) / 2);
     string memory title = "Hello world";
     string memory href = "https://example.com";
     ad.set{value: value}(title, href);
-    assertEq(ad.title(), title);
-    assertEq(ad.href(), href);
+
+    assertEq(ad.controller(), address(this));
+    assertEq(ad.collateral(), value);
+    assertEq(ad.timestamp(), block.timestamp);
+
+    (uint256 nextPrice, uint256 taxes) = ad.price();
+    assertEq(nextPrice, value); 
+    assertEq(taxes, 0); 
+
+    ad.set{value: value + 1}(title, href);
+
+    (uint256 nextPrice1, uint256 taxes1) = ad.price();
+    assertEq(nextPrice1, 1); 
+    assertEq(taxes1, 0); 
+
+    assertEq(ad.controller(), address(this));
+    assertEq(ad.timestamp(), block.timestamp);
   }
 
   function testReSetForFree() public {
@@ -54,16 +67,12 @@ contract AdTest is Test {
     assertEq(price, 0);
     assertEq(taxes, 0);
     Setter setter = new Setter();
-    uint256 setterValue = 2;
-    payable(address(setter)).transfer(setterValue);
-
-    uint256 balance0 = address(this).balance;
+    payable(address(setter)).transfer(1 ether);
+    uint256 setterValue = 1;
+    uint256 balanceBeforeSet = address(this).balance;
     setter.set(ad, title, href, setterValue);
-
-    assertEq(token.balanceOf(address(this)), 0);
-    assertEq(address(token).balance, 1);
-    uint256 balance1 = address(this).balance;
-    assertEq(balance1 - balance0, 0);
+    uint256 balanceAfterSet = address(this).balance;
+    assertEq(balanceBeforeSet, balanceAfterSet);
     assertEq(ad.controller(), address(setter));
     assertEq(ad.collateral(), 1);
     assertEq(ad.timestamp(), block.timestamp);
@@ -82,7 +91,7 @@ contract AdTest is Test {
     Setter setter = new Setter();
     payable(address(setter)).transfer(1 ether);
     vm.expectRevert(Ad.ErrValue.selector);
-    uint256 setterValue = 3;
+    uint256 setterValue = 1;
     setter.set(ad, title, href, setterValue);
   }
 
@@ -94,23 +103,6 @@ contract AdTest is Test {
     assertEq(ad.controller(), address(this));
     assertEq(ad.collateral(), value);
     assertEq(ad.timestamp(), block.timestamp);
-  }
-
-  function testTaxationAfterAMonth(uint96 value) public {
-    string memory title = "Hello world";
-    string memory href = "https://example.com";
-    ad.set{value: value}(title, href);
-
-    uint256 collateral0 = ad.collateral();
-    assertEq(ad.controller(), address(this));
-    assertEq(collateral0, value);
-    assertEq(ad.timestamp(), block.timestamp);
-
-    vm.warp(block.timestamp+2629800); // 2629800s are a month
-
-    (uint256 nextPrice1, uint256 taxes1) = ad.price();
-    assertEq(nextPrice1, 0);
-    assertEq(taxes1, ad.collateral());
   }
 
   function testReSetForLowerPrice() public {
@@ -137,7 +129,7 @@ contract AdTest is Test {
     setter.set(ad, title, href, setterValue);
   }
 
-  function testReSet(uint96 setterValue) public {
+  function testReSet() public {
     string memory title = "Hello world";
     string memory href = "https://example.com";
     uint256 value = denominator;
@@ -154,66 +146,43 @@ contract AdTest is Test {
     assertEq(nextPrice1, ad.collateral()-1);
     assertEq(taxes1, 1);
 
-    vm.assume(setterValue > denominator);
-    vm.assume(setterValue < 1_000_000_000_000_000);
-    vm.assume(setterValue % 2 == 0);
     Setter setter = new Setter();
-    payable(address(setter)).transfer(setterValue);
+    payable(address(setter)).transfer(1 ether);
     uint256 balance0 = address(this).balance;
-
+    uint256 setterValue = ad.collateral();
     setter.set(ad, title, href, setterValue);
-
-    assertEq(token.balanceOf(address(this)), 1);
-    assertEq(address(token).balance, (setterValue - denominator) / 2);
-
-    uint256 difference = setterValue - nextPrice1;
-    uint256 markup = difference / 2;
     uint256 balance1 = address(this).balance;
-    assertEq(balance1 - balance0, nextPrice1);
+    assertEq(balance1 - balance0, nextPrice1*2);
+
 
     uint256 collateral1 = ad.collateral();
     assertEq(ad.controller(), address(setter));
-    assertEq(collateral1, setterValue - markup);
+    assertEq(collateral1, setterValue-nextPrice1);
     assertEq(ad.timestamp(), block.timestamp);
   }
 
-  function testRedeemForETH(uint96 setterValue) public {
+  function testRagequitUnauthorized() public {
     string memory title = "Hello world";
     string memory href = "https://example.com";
-    uint256 value = denominator;
+    uint256 value = 1;
     ad.set{value: value}(title, href);
 
-    uint256 collateral0 = ad.collateral();
-    assertEq(ad.controller(), address(this));
-    assertEq(collateral0, value);
-    assertEq(ad.timestamp(), block.timestamp);
+    vm.expectRevert(Ad.ErrUnauthorized.selector);
+    ad.ragequit();
+  }
 
-    vm.warp(block.timestamp+1);
+  function testRagequitAsAdmin() public {
+    string memory title = "Hello world";
+    string memory href = "https://example.com";
+    uint256 value = 1;
+    ad.set{value: value}(title, href);
 
-    (uint256 nextPrice1, uint256 taxes1) = ad.price();
-    assertEq(nextPrice1, ad.collateral()-1);
-    assertEq(taxes1, 1);
+    uint256 balance0 = admin.balance;
 
-    vm.assume(setterValue > denominator);
-    vm.assume(setterValue < 1_000_000_000_000);
-    vm.assume(setterValue % 2 == 0);
-    Setter setter = new Setter();
-    payable(address(setter)).transfer(setterValue);
+    vm.prank(admin);
+    ad.ragequit();
 
-    setter.set(ad, title, href, setterValue);
-
-    assertEq(token.balanceOf(address(this)), 1);
-    assertEq(address(token).balance, (setterValue - denominator) / 2);
-
-    uint256 tokenBalance = 1;
-    uint256 amount = token.share(tokenBalance);
-    assertEq(token.totalSupply(), tokenBalance);
-    assertEq(amount, address(token).balance);
-
-    uint256 tokenETHBalance = address(token).balance;
-    uint256 balance1 = address(this).balance;
-    token.withdraw(tokenBalance);
-    assertEq(address(token).balance, 0);
-    assertEq(address(this).balance, balance1+tokenETHBalance);
+    uint256 balance1 = admin.balance;
+    assertEq(balance0+value, balance1);
   }
 }

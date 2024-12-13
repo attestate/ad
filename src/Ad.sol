@@ -4,11 +4,9 @@ pragma solidity ^0.8.13;
 import { Harberger, Perwei } from "./Harberger.sol";
 import { ReentrancyGuard } from "./ReentrancyGuard.sol";
 
-interface IERC20 {
-  function mint(address to, uint256 value) external;
-}
-
+address constant admin = 0xee324c588ceF1BF1c1360883E4318834af66366d;
 address constant treasury = 0x1337E2624ffEC537087c6774e9A18031CFEAf0a9;
+
 // NOTE: The tax rate is 1/2629742 per second. The denominator (2629743) is
 // seconds in a month. 
 // 1 month (avg. 30.44 days) = 2_629_743
@@ -28,14 +26,19 @@ contract Ad is ReentrancyGuard {
   string public title;
   string public href;
 
-  address public token;
-
   address public controller;
   uint256 public collateral;
   uint256 public timestamp;
 
-  constructor(address _token) {
-    token = _token;
+  // NOTE: We leave this ragequit function in for now as it allows an
+  // administrator to shut down the contract when a new version is deployed, or
+  // to slash a malicous ad publisher.
+  function ragequit() external {
+    if (msg.sender != admin) {
+      revert ErrUnauthorized();
+    }
+
+    admin.call{value: address(this).balance}("");
   }
 
   function price() public view returns (uint256 nextPrice, uint256 taxes) {
@@ -57,48 +60,42 @@ contract Ad is ReentrancyGuard {
       collateral = msg.value;
       timestamp = block.timestamp;
     } else {
-      // NOTE on the calculation of the markup: The term "markup" refers to the
-      // buyer premium, which is the difference between the last price
-      // (nextPrice) and the new price (msg.value).
-      //
-      // In this contract, the markup is divided by two for two reasons:
-      //
-      // 1. Half is sent to the token contract to reward the previous ad owner.
-      // 2. The other half ensures there is enough collateral to cover the tax
-      // obligations.
-      //
-      //
-      // Therefore, `msg.value` must be at least `nextPrice + 2 Wei`:
-      //
-      // - 1 Wei for the premium sent to the token contract.
-      // - 1 Wei to maintain sufficient collateral for taxation.
-      //
-      // This setup ensures both incentive alignment and compliance with tax
-      // obligations.
       (uint256 nextPrice, uint256 taxes) = price();
-      if (msg.value < nextPrice+2) {
+      if (msg.value < nextPrice + 1) {
         revert ErrValue();
       }
-
-      uint256 difference = msg.value-nextPrice;
-      uint256 markup = difference/2;
-      uint256 timeDifference = block.timestamp - timestamp;
 
       address lastController = controller;
       title = _title;
       href = _href;
       controller = msg.sender;
-      collateral = msg.value-markup;
+      collateral = msg.value - nextPrice;
       timestamp = block.timestamp;
 
       (bool treasurySuccess,) = treasury.call{value: taxes}("");
-      (bool tokenSuccess,) = token.call{value: markup}("");
-      if (!treasurySuccess || !tokenSuccess) {
+      if (!treasurySuccess) {
         revert ErrCall();
       }
-      lastController.call{value: nextPrice}("");
-
-      IERC20(token).mint(lastController, timeDifference);
+      // NOTE: We send the last controller double the amount of the current
+      // price because one times the price is just their remaining collateral,
+      // and another times the price is the buyer's transfer fee paid to take
+      // possession over the ad during acquisition. The buyer's remaining
+      // collateral (and hence the new price of the ad) is the message's value
+      // minus the transfer fee.
+      //
+      // As this was a vulnerability in prior iterations of this contract, we
+      // should also talk about what happens in the case that the buyer sends
+      // so little in msg.value that it's roughly equal to the current price of
+      // the ad.
+      // In this case, the transfer fee (which is equal to the ad's current
+      // price) is sent to the last controller, and the remainder = msg.value -
+      // nextPrice is put up as the new collateral and hence is the new price.
+      // And since this price is very low, the buyer takes on the risk of
+      // having their ad being sold at a discount.
+      lastController.call{value: nextPrice * 2}("");
+      // NOTE2: We're not checking the success of this call because it could
+      // lead to the last controller intentionally failing the call, hence
+      // making the ad contract stuck.
     }
   }
 }

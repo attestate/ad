@@ -1,5 +1,7 @@
 # Onchain Ads
 
+[This was written prior to Dec 13 and is now outdated]
+
 Author: Tim Daubenschuetz
 
 Digital assets thrive on speculation. While our previous experiments at Kiwi
