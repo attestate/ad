@@ -14,18 +14,20 @@ Basically, you can stake an amount of ETH for the contract to be yours. Say you 
 - Day 15 (half a month): Now half of your collateral was taxed (0.5 ETH). The price to transfer the ad is 0.5 ETH. Your remaining collateral is 0.5 ETH.
 - Day 30 (month): Your ad is about to be taken off the website. In case noone has bought yet, your collateral now is very low 0.0000...1 ETH, and so for someone else to buy the ad space from you is extremely cheap.
 
-Now, what would happen if someone bought your ad for 0.9 ETH on Day 15?
+Now, what would happen if someone bought your ad for 0.9 ETH on Day 12? The new flow would be:
 
-1. The contract sends your leftover collateral back to you (0.5 ETH).
-2. The buyer's transfer fee of 0.5 ETH is sent to you too.
-3. The remainder of the buyer's value (0.4 ETH) is staked as collateral and is the new price (0.4 ETH) to transfer the ad.
-4. The taxed collateral (0.5 ETH) is sent the the Kiwi News treasury.
+1. You deposit 1 ETH on Kiwi as collateral
+2. On day 12, there are 0.6 ETH left (the rest, 0.4 ETH, is locked for taxes)
+3. Alice wants to buy the new ad for 0.9 ETH. What happens then:
+   - 0.6 ETH from Alice are sent to you
+   - 0.3 ETH from Alice are kept as collateral for the new ad
+   - 0.4 ETH from your old collateral are sent to Kiwi for the taxes
+   - 0.6 ETH from your old collateral are sent back to you
 
-Here are the account balances of everyone:
-
-- You: 1 ETH
-- Ad contract: 0.4 ETH (buyer's collateral)
-- Kiwi News treasury: 0.5 ETH
+Now:
+- You have 1.2 ETH (0.6 ETH leftover collateral + 0.6 ETH from Alice)
+- Alice has 0.3 ETH as collateral on Kiwi
+- Kiwi has 0.4 ETH paid from taxes from your ad
 
 You may have heard of this concept earlier. It's often referred to as Harberger taxes, or Partial common ownership. Check out this talk from Devcon SEA about ["Demand-based recurring fees in practice"](https://www.youtube.com/watch?v=pjcP-P7q5mU) to learn more.
 
