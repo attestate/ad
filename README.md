@@ -1,3 +1,5 @@
+Update 2025-04-21: Removed the ad from Kiwi News. The website didn't have enough impressions for this to become a good business model for us at that time.
+
 # Ad
 
 ## How does it work?
